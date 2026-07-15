@@ -1,0 +1,70 @@
+name: phase4-gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: verblayer
+          POSTGRES_PASSWORD: verblayer
+          POSTGRES_DB: verblayer
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U verblayer -d verblayer"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://verblayer:verblayer@localhost:5432/verblayer
+      APP_BASE_URL: http://localhost:3100
+      AUTH_MODE: dev
+      ALLOW_DEV_AUTH_MODE: "true"
+      INTERNAL_EXECUTION_TOKEN: local-dev-token
+      DISCOVERY_PROVIDER: openai
+      OPENAI_MODEL: gpt-4.1-mini
+      REDIS_URL: redis://localhost:6379
+      EXECUTION_QUEUE_ENABLED: "true"
+      CI: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Phase 4 CI gate
+        run: pnpm verify:phase4:ci

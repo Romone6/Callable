@@ -1,0 +1,644 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppType {
+  internal_web_app
+  custom_web_app
+  api_schema
+  uploaded_workflow_evidence
+}
+
+enum ConnectionStatus {
+  not_connected
+  connected
+  failed
+}
+
+enum ExecutionMode {
+  api
+  browser
+  hybrid
+}
+
+enum SourceType {
+  sop_document
+  csv_ticket_export
+  json_browser_trace
+  openapi_schema
+  playwright_trace
+  manual_process_text
+}
+
+enum SourceStatus {
+  uploaded
+  parsed
+  parse_failed
+}
+
+enum CandidateStatus {
+  needs_review
+  accepted
+  rejected
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+enum CommandStatus {
+  draft
+  needs_review
+  testing
+  published
+  paused
+  broken
+  archived
+}
+
+enum HealthStatus {
+  unknown
+  healthy
+  warning
+  broken
+}
+
+enum StepType {
+  api
+  browser
+}
+
+enum ExecutionStatus {
+  queued
+  running
+  waiting_for_approval
+  succeeded
+  failed
+  cancelled
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  more_info
+}
+
+enum DriftStatus {
+  healthy
+  warning
+  broken
+}
+
+enum DriftSeverity {
+  low
+  medium
+  high
+}
+
+enum CronJwksKeyStatus {
+  active
+  grace
+  retired
+}
+
+enum ActorType {
+  system
+  user
+  agent
+}
+
+model Organisation {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  clerkOrgId String? @unique @map("clerk_org_id")
+  plan      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users             User[]
+  customRoles       CustomRole[]
+  apps              App[]
+  discoverySources  DiscoverySource[]
+  workflowCandidates WorkflowCandidate[]
+  actionCommands    ActionCommand[]
+  commandExecutions CommandExecution[]
+  approvals         Approval[]
+  approvalPolicies  ApprovalPolicy[]
+  sendEvents        SendEvent[]
+  driftChecks       DriftCheck[]
+  auditLogs         AuditLog[]
+  apiKeys           ApiKey[]
+  retentionPolicies RetentionPolicy[]
+  exportSigningKeys  ExportSigningKey[]
+  complianceExports  ComplianceExport[]
+  identityProviders IdentityProvider[]
+  scimTokens        ScimToken[]
+  securityPolicy    OrganisationSecurityPolicy?
+  customers         Customer[]
+  tickets           Ticket[]
+  refunds           Refund[]
+
+  @@map("organisations")
+}
+
+model RetentionPolicy {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  auditLogDays   Int      @default(90) @map("audit_log_days")
+  approvalDays   Int      @default(90) @map("approval_days")
+  executionDays  Int      @default(90) @map("execution_days")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@unique([organisationId])
+  @@map("retention_policies")
+}
+
+model ExportSigningKey {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  keyId          String   @map("key_id")
+  keyCipherJson  Json     @map("key_cipher_json")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  rotatedAt      DateTime? @map("rotated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  exports      ComplianceExport[]
+
+  @@index([organisationId])
+  @@unique([organisationId, keyId])
+  @@map("export_signing_keys")
+}
+
+model ComplianceExport {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  resource       String
+  format         String
+  rowCount       Int      @default(0) @map("row_count")
+  fromDate       DateTime? @map("from_date")
+  toDate         DateTime? @map("to_date")
+  signature      String
+  signatureKeyId String   @map("signature_key_id")
+  artifactPath   String   @map("artifact_path")
+  createdBy      String?  @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  signingKey   ExportSigningKey @relation(fields: [signatureKeyId], references: [id], onDelete: Restrict)
+
+  @@index([organisationId])
+  @@index([resource, createdAt])
+  @@map("compliance_exports")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  email          String   @unique
+  clerkUserId    String?  @unique @map("clerk_user_id")
+  externalId     String?  @map("external_id")
+  name           String
+  role           String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([organisationId, externalId])
+  @@map("users")
+}
+
+model CustomRole {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  roleKey        String   @map("role_key")
+  name           String
+  description    String?  @map("description")
+  permissionsJson Json    @map("permissions_json")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@unique([organisationId, roleKey])
+  @@index([organisationId])
+  @@map("custom_roles")
+}
+
+model App {
+  id               String           @id @default(cuid())
+  organisationId   String           @map("organisation_id")
+  name             String
+  type             AppType
+  baseUrl          String           @map("base_url")
+  authMethod       String           @map("auth_method")
+  connectionStatus ConnectionStatus @default(not_connected) @map("connection_status")
+  executionMode    ExecutionMode    @default(hybrid) @map("execution_mode")
+  metadataJson     Json?            @map("metadata_json")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  organisation      Organisation      @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  discoverySources  DiscoverySource[]
+  workflowCandidates WorkflowCandidate[]
+  actionCommands    ActionCommand[]
+
+  @@index([organisationId])
+  @@map("apps")
+}
+
+model DiscoverySource {
+  id             String       @id @default(cuid())
+  organisationId String       @map("organisation_id")
+  appId          String?      @map("app_id")
+  type           SourceType
+  name           String
+  fileUrl        String?      @map("file_url")
+  rawText        String?      @map("raw_text")
+  parsedJson     Json?        @map("parsed_json")
+  status         SourceStatus @default(uploaded)
+  errorMessage   String?      @map("error_message")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  app          App?         @relation(fields: [appId], references: [id], onDelete: SetNull)
+
+  @@index([organisationId])
+  @@index([appId])
+  @@map("discovery_sources")
+}
+
+model WorkflowCandidate {
+  id                    String          @id @default(cuid())
+  organisationId        String          @map("organisation_id")
+  appId                 String?         @map("app_id")
+  name                  String
+  description           String
+  confidence            Float
+  riskLevel             RiskLevel       @map("risk_level")
+  requiredInputsJson    Json            @map("required_inputs_json")
+  expectedOutputsJson   Json            @map("expected_outputs_json")
+  approvalConditionsJson Json?          @map("approval_conditions_json")
+  sourceEvidenceJson    Json            @map("source_evidence_json")
+  status                CandidateStatus @default(needs_review)
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+
+  organisation Organisation   @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  app          App?           @relation(fields: [appId], references: [id], onDelete: SetNull)
+  commands     ActionCommand[]
+
+  @@index([organisationId])
+  @@index([appId])
+  @@map("workflow_candidates")
+}
+
+model ActionCommand {
+  id                  String        @id @default(cuid())
+  organisationId      String        @map("organisation_id")
+  appId               String?       @map("app_id")
+  candidateId         String?       @map("candidate_id")
+  name                String
+  description         String
+  inputSchemaJson     Json          @map("input_schema_json")
+  outputSchemaJson    Json          @map("output_schema_json")
+  executionStrategy   String        @map("execution_strategy")
+  riskLevel           RiskLevel     @map("risk_level")
+  approvalRulesJson   Json?         @map("approval_rules_json")
+  successCondition    String        @map("success_condition")
+  failureConditionsJson Json?       @map("failure_conditions_json")
+  sourceEvidenceJson  Json          @map("source_evidence_json")
+  status              CommandStatus @default(draft)
+  healthStatus        HealthStatus  @default(unknown) @map("health_status")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
+
+  organisation Organisation       @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  app          App?               @relation(fields: [appId], references: [id], onDelete: SetNull)
+  candidate    WorkflowCandidate? @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  steps        CommandStep[]
+  executions   CommandExecution[]
+  approvals    Approval[]
+  drifts       DriftCheck[]
+  audits       AuditLog[]
+  sendEvents   SendEvent[]
+
+  @@index([organisationId])
+  @@index([name])
+  @@index([appId])
+  @@map("action_commands")
+}
+
+model CommandStep {
+  id                 String   @id @default(cuid())
+  commandId          String   @map("command_id")
+  stepIndex          Int      @map("step_index")
+  stepType           StepType @map("step_type")
+  apiRoute           String?  @map("api_route")
+  httpMethod         String?  @map("http_method")
+  selector           String?
+  fallbackSelector   String?  @map("fallback_selector")
+  inputMappingJson   Json?    @map("input_mapping_json")
+  successConditionJson Json?  @map("success_condition_json")
+  errorConditionJson Json?    @map("error_condition_json")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  command ActionCommand @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  @@index([commandId])
+  @@map("command_steps")
+}
+
+model CommandExecution {
+  id             String          @id @default(cuid())
+  organisationId String          @map("organisation_id")
+  commandId      String          @map("command_id")
+  idempotencyKey String?         @map("idempotency_key")
+  agentName      String          @map("agent_name")
+  userId         String?         @map("user_id")
+  inputJson      Json            @map("input_json")
+  outputJson     Json?           @map("output_json")
+  status         ExecutionStatus @default(queued)
+  executionMode  ExecutionMode   @default(api) @map("execution_mode")
+  approvalStatus ApprovalStatus? @map("approval_status")
+  errorMessage   String?         @map("error_message")
+  traceUrl       String?         @map("trace_url")
+  startedAt      DateTime?       @map("started_at")
+  completedAt    DateTime?       @map("completed_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  command      ActionCommand @relation(fields: [commandId], references: [id], onDelete: Cascade)
+  approvals    Approval[]
+  audits       AuditLog[]
+  sendEvents   SendEvent[]
+
+  @@index([organisationId])
+  @@index([commandId])
+  @@unique([organisationId, commandId, idempotencyKey])
+  @@map("command_executions")
+}
+
+model Approval {
+  id               String         @id @default(cuid())
+  organisationId   String         @map("organisation_id")
+  executionId      String         @map("execution_id")
+  commandId        String         @map("command_id")
+  requestedByAgent String         @map("requested_by_agent")
+  reviewerId       String?        @map("reviewer_id")
+  status           ApprovalStatus @default(pending)
+  reason           String
+  stageIndex       Int            @default(0) @map("stage_index")
+  stageName        String?        @map("stage_name")
+  requiredRole     String?        @map("required_role")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  resolvedAt       DateTime?      @map("resolved_at")
+
+  organisation Organisation    @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  execution    CommandExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  command      ActionCommand    @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([executionId])
+  @@map("approvals")
+}
+
+model ApprovalPolicy {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  name           String
+  status         String   @default("active")
+  isDefault      Boolean  @default(false) @map("is_default")
+  policyJson     Json     @map("policy_json")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  sendEvents   SendEvent[]
+
+  @@index([organisationId])
+  @@index([organisationId, status, isDefault])
+  @@map("approval_policies")
+}
+
+model SendEvent {
+  id                       String   @id @default(cuid())
+  organisationId           String   @map("organisation_id")
+  commandId                String?  @map("command_id")
+  executionId              String?  @map("execution_id")
+  approvalPolicyId         String?  @map("approval_policy_id")
+  source                   String
+  decisionStatus           String   @map("decision_status")
+  decisionSnapshotJson     Json     @map("decision_snapshot_json")
+  reviewerStateJson        Json?    @map("reviewer_state_json")
+  riskStateJson            Json?    @map("risk_state_json")
+  connectorTargetJson      Json?    @map("connector_target_json")
+  deliveryConfirmationJson Json?    @map("delivery_confirmation_json")
+  deliveryState            String   @default("not_dispatched") @map("delivery_state")
+  createdBy                String?  @map("created_by")
+  createdAt                DateTime @default(now()) @map("created_at")
+
+  organisation   Organisation     @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  command        ActionCommand?   @relation(fields: [commandId], references: [id], onDelete: SetNull)
+  execution      CommandExecution? @relation(fields: [executionId], references: [id], onDelete: SetNull)
+  approvalPolicy ApprovalPolicy?  @relation(fields: [approvalPolicyId], references: [id], onDelete: SetNull)
+
+  @@index([organisationId, createdAt])
+  @@index([commandId])
+  @@index([executionId])
+  @@index([approvalPolicyId])
+  @@map("send_events")
+}
+
+model IdentityProvider {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  providerType   String   @map("provider_type")
+  name           String
+  issuer         String?  @map("issuer")
+  ssoUrl         String?  @map("sso_url")
+  x509Cert       String?  @map("x509_cert")
+  domainsJson    Json?    @map("domains_json")
+  metadataJson   Json?    @map("metadata_json")
+  enabled        Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@map("identity_providers")
+}
+
+model ScimToken {
+  id             String    @id @default(cuid())
+  organisationId String    @map("organisation_id")
+  name           String
+  tokenHash      String    @map("token_hash")
+  lastUsedAt     DateTime? @map("last_used_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  revokedAt      DateTime? @map("revoked_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@map("scim_tokens")
+}
+
+model DriftCheck {
+  id               String        @id @default(cuid())
+  organisationId   String        @map("organisation_id")
+  commandId        String        @map("command_id")
+  status           DriftStatus
+  severity         DriftSeverity
+  issueType        String        @map("issue_type")
+  issueDescription String        @map("issue_description")
+  rawResultJson    Json          @map("raw_result_json")
+  checkedAt        DateTime      @default(now()) @map("checked_at")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  command      ActionCommand @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([commandId])
+  @@map("drift_checks")
+}
+
+model AuditLog {
+  id             String    @id @default(cuid())
+  organisationId String    @map("organisation_id")
+  eventType      String    @map("event_type")
+  actorType      ActorType @map("actor_type")
+  actorId        String?   @map("actor_id")
+  commandId      String?   @map("command_id")
+  executionId    String?   @map("execution_id")
+  detailsJson    Json      @map("details_json")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  organisation Organisation   @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  command      ActionCommand? @relation(fields: [commandId], references: [id], onDelete: SetNull)
+  execution    CommandExecution? @relation(fields: [executionId], references: [id], onDelete: SetNull)
+
+  @@index([organisationId])
+  @@index([eventType])
+  @@index([commandId])
+  @@index([executionId])
+  @@map("audit_logs")
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organisationId String    @map("organisation_id")
+  name           String
+  keyHash        String    @map("key_hash")
+  scopesJson     Json      @map("scopes_json")
+  lastUsedAt     DateTime? @map("last_used_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  revokedAt      DateTime? @map("revoked_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@map("api_keys")
+}
+
+model OrganisationSecurityPolicy {
+  id                    String   @id @default(cuid())
+  organisationId        String   @unique @map("organisation_id")
+  sessionTimeoutMinutes Int      @default(480) @map("session_timeout_minutes")
+  apiKeyTtlDays         Int      @default(90) @map("api_key_ttl_days")
+  requireMfa            Boolean  @default(false) @map("require_mfa")
+  ipAllowlistJson       Json?    @map("ip_allowlist_json")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  @@map("organisation_security_policies")
+}
+
+model CronJwksKey {
+  id            String           @id @default(cuid())
+  keyId         String           @unique @map("key_id")
+  publicJwkJson Json             @map("public_jwk_json")
+  status        CronJwksKeyStatus @default(active)
+  graceUntil    DateTime?        @map("grace_until")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  rotatedAt     DateTime?        @map("rotated_at")
+
+  @@index([status])
+  @@map("cron_jwks_keys")
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  externalId     String   @unique @map("external_id")
+  email          String
+  name           String
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  tickets      Ticket[]
+  refunds      Refund[]
+
+  @@index([organisationId])
+  @@map("customers")
+}
+
+model Ticket {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  customerId     String   @map("customer_id")
+  ticketCode     String   @unique @map("ticket_code")
+  subject        String
+  description    String
+  status         String
+  refundEligible Boolean  @default(true) @map("refund_eligible")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  refunds      Refund[]
+
+  @@index([organisationId])
+  @@index([customerId])
+  @@map("tickets")
+}
+
+model Refund {
+  id             String   @id @default(cuid())
+  organisationId String   @map("organisation_id")
+  customerId     String   @map("customer_id")
+  ticketId       String   @map("ticket_id")
+  amount         Decimal  @db.Decimal(10, 2)
+  reason         String
+  confirmationId String   @unique @map("confirmation_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ticket       Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([ticketId])
+  @@map("refunds")
+}
