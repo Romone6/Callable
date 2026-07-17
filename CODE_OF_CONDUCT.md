@@ -2,7 +2,7 @@
 
 ## Our pledge
 
-We pledge to make participation in VerblLayer welcoming and harassment-free, regardless of age, body size, disability, ethnicity, gender identity or expression, experience level, education, nationality, personal appearance, race, religion, sexual identity or orientation.
+We pledge to make participation in Callable welcoming and harassment-free, regardless of age, body size, disability, ethnicity, gender identity or expression, experience level, education, nationality, personal appearance, race, religion, sexual identity or orientation.
 
 ## Expected behaviour
 

@@ -10,4 +10,4 @@ Use GitHub Discussions for installation questions, deployment notes, and workflo
 
 ## What to include
 
-Include the VerblLayer version or commit, deployment mode, redacted logs, the exact command run, and the expected versus actual result. Never include API keys, database URLs, proxy secrets, or customer data.
+Include the Callable version or commit, deployment mode, redacted logs, the exact command run, and the expected versus actual result. Never include API keys, database URLs, proxy secrets, or customer data.

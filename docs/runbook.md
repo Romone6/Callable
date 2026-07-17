@@ -15,7 +15,7 @@ Postgres is the only required container and is exposed at `localhost:55432`. `DE
 
 ## Production console authentication
 
-Place an identity-aware reverse proxy in front of the console. It must remove any client-provided `x-verblayer-auth-secret`, `x-verblayer-org`, and `x-verblayer-email` headers, authenticate the request, then inject all three headers itself. The secret must exactly match `TRUSTED_AUTH_PROXY_SECRET`; the organization slug and email must match a pre-provisioned database user. VerblLayer does not create users from headers and uses only the persisted database role for authorization.
+Place an identity-aware reverse proxy in front of the console. It must remove any client-provided `x-callable-auth-secret`, `x-callable-org`, and `x-callable-email` headers, authenticate the request, then inject all three headers itself. The secret must exactly match `TRUSTED_AUTH_PROXY_SECRET`; the organization slug and email must match a pre-provisioned database user. Callable does not create users from headers and uses only the persisted database role for authorization.
 
 ## Real smoke flow
 
@@ -31,7 +31,7 @@ Place an identity-aware reverse proxy in front of the console. It must remove an
 
 1. Set real server environment values such as `ZENDESK_API_TOKEN` and `ZENDESK_AGENT_EMAIL`; do not put values in the app form.
 2. At `/apps`, choose **Zendesk ticket updates**, enter `https://your-subdomain.zendesk.com`, then enter only the two environment-variable names.
-3. Run **Test connection**. VerblLayer calls Zendesk's real `GET /api/v2/users/me.json` endpoint and records the actual remote error if credentials or connectivity are invalid.
+3. Run **Test connection**. Callable calls Zendesk's real `GET /api/v2/users/me.json` endpoint and records the actual remote error if credentials or connectivity are invalid.
 4. Create a command on that app with route `/api/v2/tickets/{ticket_id}.json` and method `PUT`. Its input must include `ticket_id` and one or more of `status`, `priority`, or `comment`.
 5. A live run uses Zendesk's real ticket-update API. Three consecutive non-dry-run failures pause the currently published command and create an audit record; a dry run never counts toward that guard.
 

@@ -4,7 +4,7 @@ const secured = [{ bearerAuth: [] }];
 export function buildOpenApiSpec(request: Request) {
   return {
     openapi: "3.1.0",
-    info: { title: "VerblLayer REST API", version: "v1", description: "Open-source command-layer API for real controlled workflow execution." },
+    info: { title: "Callable REST API", version: "v1", description: "Open-source command-layer API for real controlled workflow execution." },
     servers: server(request),
     tags: [{ name: "Health" }, { name: "Agent Commands" }, { name: "MCP" }],
     components: { securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "API Key" } } },
@@ -15,7 +15,7 @@ export function buildOpenApiSpec(request: Request) {
       "/api/agent/commands/{name}/dry-run": { post: { tags: ["Agent Commands"], summary: "Validate a command without side effects", security: secured, responses: { "200": { description: "Dry-run result." } } } },
       "/api/agent/commands/{name}/run": { post: { tags: ["Agent Commands"], summary: "Run a reviewed command", security: secured, responses: { "200": { description: "Execution result." } } } },
       "/api/agent/executions/{id}": { get: { tags: ["Agent Commands"], summary: "Get execution status", security: secured, responses: { "200": { description: "Execution status." }, "404": { description: "Execution not found." } } } },
-      "/api/mcp": { post: { tags: ["MCP"], summary: "Call a VerblLayer MCP tool", security: secured, responses: { "200": { description: "Tool result." }, "400": { description: "Unsupported request." } } } },
+      "/api/mcp": { post: { tags: ["MCP"], summary: "Call a Callable MCP tool", security: secured, responses: { "200": { description: "Tool result." }, "400": { description: "Unsupported request." } } } },
       "/api/mcp/audit": { get: { tags: ["MCP"], summary: "List MCP invocation audits", security: secured, responses: { "200": { description: "Audit stream." } } } },
     } as Record<string, unknown>,
   };

@@ -12,19 +12,19 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: verblayer
-          POSTGRES_PASSWORD: verblayer
-          POSTGRES_DB: verblayer
+          POSTGRES_USER: callable
+          POSTGRES_PASSWORD: callable
+          POSTGRES_DB: callable
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U verblayer -d verblayer"
+          --health-cmd "pg_isready -U callable -d callable"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
 
     env:
-      DATABASE_URL: postgresql://verblayer:verblayer@localhost:5432/verblayer
+      DATABASE_URL: postgresql://callable:callable@localhost:5432/callable
       APP_BASE_URL: http://localhost:3100
       AUTH_MODE: dev
       DEV_AUTH_ENABLED: "true"

@@ -4,6 +4,10 @@ All notable public changes are recorded here. This project follows [Keep a Chang
 
 ## Unreleased
 
+### Changed
+
+- Renamed the project, GitHub repository, protocol headers, default Postgres identifiers, package, and public API identity from VerblLayer to Callable. This is a breaking deployment change for trusted-proxy header configuration and local database connection strings.
+
 ### Added
 
 - Self-hosted public core for discovering real workflow evidence and publishing reviewed, agent-callable commands.

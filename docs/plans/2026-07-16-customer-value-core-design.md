@@ -10,7 +10,7 @@ The existing Acme target proves execution but does not let a customer connect th
 
 ## Product flow
 
-1. A trusted identity proxy authenticates the console user and passes a signed shared-secret header, organisation slug, and email. VerblLayer resolves the already-provisioned user and its database role.
+1. A trusted identity proxy authenticates the console user and passes a signed shared-secret header, organisation slug, and email. Callable resolves the already-provisioned user and its database role.
 2. An owner registers either the built-in Acme target or Zendesk. Zendesk credentials remain server environment variables; the database stores variable names, never the secret.
 3. Evidence produces a review candidate. The candidate card shows its persisted evidence references.
 4. An operator uses a guided editor to choose the reviewed API route, method, and amount threshold. JSON remains only for arbitrary input/output schemas.
@@ -20,7 +20,7 @@ The existing Acme target proves execution but does not let a customer connect th
 
 ## Boundaries
 
-- `trusted_proxy` authentication depends on a reverse proxy that strips client-supplied identity headers and injects `x-verblayer-auth-secret`, `x-verblayer-org`, and `x-verblayer-email`. It provisions no users automatically.
+- `trusted_proxy` authentication depends on a reverse proxy that strips client-supplied identity headers and injects `x-callable-auth-secret`, `x-callable-org`, and `x-callable-email`. It provisions no users automatically.
 - Zendesk supports one concrete operation: update a ticket. It uses configured environment variable names for an API token and agent email; no secrets are stored in PostgreSQL.
 - Command versions are append-only snapshots created on publish. There is no generic release workflow, background queue, browser fallback, OAuth client, or connector framework.
 - Automatic pausing is a fixed three-consecutive-failure safety guard. It is not an incident-management system.

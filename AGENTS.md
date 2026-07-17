@@ -2,7 +2,7 @@
 
 ## Product
 
-VerblLayer is an agent-native command layer for existing business software.
+Callable is an agent-native command layer for existing business software.
 
 It discovers workflows inside real business tools or real workflow evidence, turns them into structured commands and exposes those commands to AI agents through MCP and REST APIs.
 
@@ -29,7 +29,7 @@ The MVP must be narrow but real.
 
 ## Correct product framing
 
-Do not build VerblLayer as:
+Do not build Callable as:
 - a company brain
 - a generic knowledge base
 - a chatbot
@@ -37,7 +37,7 @@ Do not build VerblLayer as:
 - a document Q&A tool
 - a frontend-only demo
 
-Build VerblLayer as:
+Build Callable as:
 - a command layer for business software
 - a semantic wrapper for existing workflows
 - an MCP/API gateway for agent-executable commands
@@ -50,12 +50,12 @@ The main MVP flow is:
 1. User creates workspace.
 2. User registers a real target app.
 3. User uploads real workflow evidence such as SOPs, CSV exports or traces.
-4. VerblLayer discovers workflow candidates from that evidence.
+4. Callable discovers workflow candidates from that evidence.
 5. User accepts a candidate.
-6. VerblLayer generates a command schema.
+6. Callable generates a command schema.
 7. User reviews and publishes the command.
 8. Agent calls command through MCP/API.
-9. VerblLayer executes command through real API/browser automation.
+9. Callable executes command through real API/browser automation.
 10. Execution is logged.
 11. Drift checks verify command health.
 

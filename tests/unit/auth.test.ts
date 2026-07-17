@@ -9,9 +9,9 @@ describe("validateTrustedProxyIdentity", () => {
     expect(
       validateTrustedProxyIdentity(
         new Headers({
-          "x-verblayer-auth-secret": secret,
-          "x-verblayer-org": "acme",
-          "x-verblayer-email": "owner@example.com",
+          "x-callable-auth-secret": secret,
+          "x-callable-org": "acme",
+          "x-callable-email": "owner@example.com",
         }),
         secret,
       ),
@@ -19,10 +19,10 @@ describe("validateTrustedProxyIdentity", () => {
   });
 
   it.each([
-    ["missing secret", new Headers({ "x-verblayer-org": "acme", "x-verblayer-email": "owner@example.com" })],
-    ["wrong secret", new Headers({ "x-verblayer-auth-secret": "wrong", "x-verblayer-org": "acme", "x-verblayer-email": "owner@example.com" })],
-    ["missing organisation", new Headers({ "x-verblayer-auth-secret": secret, "x-verblayer-email": "owner@example.com" })],
-    ["invalid email", new Headers({ "x-verblayer-auth-secret": secret, "x-verblayer-org": "acme", "x-verblayer-email": "not-an-email" })],
+    ["missing secret", new Headers({ "x-callable-org": "acme", "x-callable-email": "owner@example.com" })],
+    ["wrong secret", new Headers({ "x-callable-auth-secret": "wrong", "x-callable-org": "acme", "x-callable-email": "owner@example.com" })],
+    ["missing organisation", new Headers({ "x-callable-auth-secret": secret, "x-callable-email": "owner@example.com" })],
+    ["invalid email", new Headers({ "x-callable-auth-secret": secret, "x-callable-org": "acme", "x-callable-email": "not-an-email" })],
   ])("rejects %s", (_caseName, headers) => {
     expect(() => validateTrustedProxyIdentity(headers, secret)).toThrow();
   });

@@ -7,7 +7,7 @@ const sans = Space_Grotesk({ subsets: ["latin"], display: "swap", variable: "--f
 const mono = IBM_Plex_Mono({ subsets: ["latin"], display: "swap", weight: ["400", "500"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "VerblLayer",
+  title: "Callable",
   description: "An open-source command layer for business software.",
 };
 

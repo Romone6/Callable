@@ -5,7 +5,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
     <div className="marketing-main min-h-screen">
       <header className="border-b border-white/10 px-4 py-4 md:px-6">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="font-semibold tracking-tight text-lime-200">VerblLayer</Link>
+          <Link href="/" className="font-semibold tracking-tight text-lime-200">Callable</Link>
           <Link href="/dashboard" className="text-sm text-[var(--muted-text)] hover:text-white">Open local workspace</Link>
         </div>
       </header>

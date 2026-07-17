@@ -7,7 +7,7 @@ describe("health route", () => {
     expect([200, 503]).toContain(response.status);
 
     const body = await response.json();
-    expect(body.service).toBe("verblayer");
+    expect(body.service).toBe("callable");
     expect(["ok", "degraded"]).toContain(body.status);
     expect(typeof body.timestamp).toBe("string");
 

@@ -20,9 +20,9 @@ export type TrustedProxyIdentity = {
   email: string;
 };
 
-const proxySecretHeader = "x-verblayer-auth-secret";
-const proxyOrganisationHeader = "x-verblayer-org";
-const proxyEmailHeader = "x-verblayer-email";
+const proxySecretHeader = "x-callable-auth-secret";
+const proxyOrganisationHeader = "x-callable-org";
+const proxyEmailHeader = "x-callable-email";
 
 function secretsMatch(actual: string, expected: string): boolean {
   const actualBuffer = Buffer.from(actual);

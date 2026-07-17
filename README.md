@@ -1,14 +1,14 @@
-# VerblLayer
+# Callable
 
 **Turn real business workflows into reviewed, agent-callable commands.**
 
-VerblLayer is an open-source, self-hosted command layer for existing business software. It accepts real workflow evidence, helps an operator turn that evidence into a reviewed command contract, and exposes the command to AI agents through REST and MCP. Every execution, approval, drift check, and audit event is persisted.
+Callable is an open-source, self-hosted command layer for existing business software. It accepts real workflow evidence, helps an operator turn that evidence into a reviewed command contract, and exposes the command to AI agents through REST and MCP. Every execution, approval, drift check, and audit event is persisted.
 
 It is not a chatbot, generic knowledge base, RPA clone, or simulated demo.
 
 ## Why it exists
 
-Agents need a safe way to act in business software. Raw APIs are often too low-level; opaque automation is too hard to review. VerblLayer sits between them: it makes a workflow explicit, validates inputs, enforces approvals, calls a real target, and retains the evidence needed to understand what happened.
+Agents need a safe way to act in business software. Raw APIs are often too low-level; opaque automation is too hard to review. Callable sits between them: it makes a workflow explicit, validates inputs, enforces approvals, calls a real target, and retains the evidence needed to understand what happened.
 
 ## How it works
 
@@ -36,7 +36,7 @@ flowchart LR
 | Workflow discovery | Available when configured | Uses OpenAI, Anthropic, or OpenRouter. Missing credentials return an unavailable state. |
 | REST, MCP, and OpenAPI | Implemented | API-key scoped, persisted agent access. |
 | Approvals, command versions, audit, and drift | Implemented | Commands are reviewed, versioned, and safety-paused after repeated real failures. |
-| Other SaaS execution targets | Unavailable | VerblLayer does not imply connector support that has not been built and verified. |
+| Other SaaS execution targets | Unavailable | Callable does not imply connector support that has not been built and verified. |
 
 See [docs/CAPABILITIES.md](docs/CAPABILITIES.md) for the complete capability ledger.
 
@@ -77,15 +77,15 @@ DEV_AUTH_ENABLED=false
 TRUSTED_AUTH_PROXY_SECRET=<32+ character secret>
 ```
 
-The proxy must remove every client-provided `x-verblayer-*` header, authenticate the request, then inject:
+The proxy must remove every client-provided `x-callable-*` header, authenticate the request, then inject:
 
 ```text
-x-verblayer-auth-secret
-x-verblayer-org
-x-verblayer-email
+x-callable-auth-secret
+x-callable-org
+x-callable-email
 ```
 
-VerblLayer checks the shared secret, resolves the email and organisation to an existing user, and uses only the persisted role for authorisation. Keep API keys, provider keys, Zendesk credentials, and database credentials server-side. Put a rate-limiting reverse proxy or equivalent edge layer in front of a public deployment.
+Callable checks the shared secret, resolves the email and organisation to an existing user, and uses only the persisted role for authorisation. Keep API keys, provider keys, Zendesk credentials, and database credentials server-side. Put a rate-limiting reverse proxy or equivalent edge layer in front of a public deployment.
 
 ## Agent access
 
@@ -97,7 +97,7 @@ Invoke-WebRequest -Method Post -Uri "http://localhost:3100/api/mcp" -Headers $he
 Invoke-WebRequest -Method Get -Uri "http://localhost:3100/api/v1/openapi"
 ```
 
-Use the returned input schema and command name for any subsequent call. VerblLayer does not provide a fabricated example command.
+Use the returned input schema and command name for any subsequent call. Callable does not provide a fabricated example command.
 
 ## Safety model
 

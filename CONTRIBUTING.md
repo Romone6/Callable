@@ -1,6 +1,6 @@
-# Contributing to VerblLayer
+# Contributing to Callable
 
-VerblLayer is a narrow, self-hosted command layer for real business workflows. Contributions must make the real path clearer, safer, or easier to operate.
+Callable is a narrow, self-hosted command layer for real business workflows. Contributions must make the real path clearer, safer, or easier to operate.
 
 ## Before opening a pull request
 

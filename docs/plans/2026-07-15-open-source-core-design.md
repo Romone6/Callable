@@ -2,7 +2,7 @@
 
 ## Decision
 
-VerblLayer becomes a self-hosted command layer, not an enterprise SaaS control plane. The default runtime is one Next.js application backed by Postgres, with one real Acme sample target and synchronous execution.
+Callable becomes a self-hosted command layer, not an enterprise SaaS control plane. The default runtime is one Next.js application backed by Postgres, with one real Acme sample target and synchronous execution.
 
 ## Public core
 

@@ -4,7 +4,7 @@
 
 **Goal:** Make the open-source core deployable behind a trusted identity proxy and materially useful for support operations, with real per-app execution, an explicit Zendesk connector, guided publishing, immutable publish snapshots, and automatic safety pausing after repeated real failures.
 
-**Architecture:** Authentication remains deliberately small: a deployment-owned proxy authenticates the person and injects signed-by-secret identity headers, while VerblLayer resolves an existing database user and role. App configuration stores only public metadata and environment-variable names. The executor selects the command's persisted app and API step, dispatches directly to either the controlled Acme target or the narrow Zendesk ticket-update adapter, then records real outcomes. Publishing creates a command-version snapshot; three consecutive non-dry-run failures pause a published command.
+**Architecture:** Authentication remains deliberately small: a deployment-owned proxy authenticates the person and injects signed-by-secret identity headers, while Callable resolves an existing database user and role. App configuration stores only public metadata and environment-variable names. The executor selects the command's persisted app and API step, dispatches directly to either the controlled Acme target or the narrow Zendesk ticket-update adapter, then records real outcomes. Publishing creates a command-version snapshot; three consecutive non-dry-run failures pause a published command.
 
 **Tech stack:** Next.js App Router, TypeScript, Prisma/PostgreSQL, Zod, Vitest, React Hook Form.
 
@@ -32,7 +32,7 @@
 4. Add a pure `validateTrustedProxyIdentity(headers, secret)` helper in `lib/auth.ts`, using `crypto.timingSafeEqual` for the secret. Resolve the identified user by the injected organization slug and email; do not create users or trust a role header.
 5. Retain current developer auth only for `NODE_ENV !== production && DEV_AUTH_ENABLED=true`.
 6. Re-run the focused unit test and then `npm.cmd run lint`.
-7. Document the non-negotiable reverse-proxy contract: strip inbound `x-verblayer-*` headers, authenticate upstream, then inject `x-verblayer-auth-secret`, `x-verblayer-org`, and `x-verblayer-email`.
+7. Document the non-negotiable reverse-proxy contract: strip inbound `x-callable-*` headers, authenticate upstream, then inject `x-callable-auth-secret`, `x-callable-org`, and `x-callable-email`.
 
 ## Task 2: Register and test the narrow real Zendesk connector
 

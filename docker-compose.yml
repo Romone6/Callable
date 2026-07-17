@@ -1,14 +1,14 @@
 services:
   postgres:
     image: postgres:16
-    container_name: verblayer-postgres
+    container_name: callable-postgres
     environment:
-      POSTGRES_USER: verblayer
-      POSTGRES_PASSWORD: verblayer
-      POSTGRES_DB: verblayer
+      POSTGRES_USER: callable
+      POSTGRES_PASSWORD: callable
+      POSTGRES_DB: callable
     ports:
       - "55432:5432"
     volumes:
-      - verblayer_pg_data:/var/lib/postgresql/data
+      - callable_pg_data:/var/lib/postgresql/data
 volumes:
-  verblayer_pg_data:
+  callable_pg_data:

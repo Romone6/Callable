@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 
 type Check = { status: "ok" | "error" | "unavailable"; detail: string };
-export type ReadinessReport = { status: "ok" | "degraded"; service: "verblayer"; timestamp: string; checks: { database: Check; discovery: Check; localAuth: Check } };
+export type ReadinessReport = { status: "ok" | "degraded"; service: "callable"; timestamp: string; checks: { database: Check; discovery: Check; localAuth: Check } };
 
 async function database(): Promise<Check> {
   try { await prisma.$queryRaw`SELECT 1`; return { status: "ok", detail: "database reachable" }; }
@@ -18,5 +18,5 @@ export async function getReadinessReport(): Promise<ReadinessReport> {
   const [databaseCheck] = await Promise.all([database()]);
   const discoveryCheck = discovery();
   const localAuth: Check = env.DEV_AUTH_ENABLED ? { status: "ok", detail: "development-only local console auth enabled" } : { status: "unavailable", detail: "local console auth disabled" };
-  return { status: databaseCheck.status === "error" ? "degraded" : "ok", service: "verblayer", timestamp: new Date().toISOString(), checks: { database: databaseCheck, discovery: discoveryCheck, localAuth } };
+  return { status: databaseCheck.status === "error" ? "degraded" : "ok", service: "callable", timestamp: new Date().toISOString(), checks: { database: databaseCheck, discovery: discoveryCheck, localAuth } };
 }

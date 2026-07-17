@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use inline execution task-by-task with tests before production changes.
 
-**Goal:** Convert VerblLayer into a contributor-ready, self-hosted command runtime with an honest real execution path.
+**Goal:** Convert Callable into a contributor-ready, self-hosted command runtime with an honest real execution path.
 
 **Architecture:** Retain the existing Next.js, Prisma, MCP, REST, approval, audit, drift, and Acme target paths. Remove enterprise-only routes and dependencies. Reuse persisted `CommandStep` rows as the explicit execution contract instead of generating hardcoded Acme steps.
 
