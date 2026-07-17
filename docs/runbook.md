@@ -11,7 +11,7 @@ pnpm prisma:seed
 pnpm dev
 ```
 
-Postgres is the only required container and is exposed at `localhost:55432`. The rebranded Compose configuration deliberately reuses the existing local Docker data volume, so upgrading to Callable keeps previously persisted records mounted. `DEV_AUTH_ENABLED=true` is only for local development and test. Production requires `AUTH_MODE=trusted_proxy`, `DEV_AUTH_ENABLED=false`, and a 32+ character `TRUSTED_AUTH_PROXY_SECRET`. Set a long `INTERNAL_EXECUTION_TOKEN` before exposing a controlled target.
+Postgres is the only required container and is exposed at `localhost:55432`. New installations use the Callable Postgres defaults. The rebranded Compose configuration deliberately reuses the existing local Docker data volume, so an upgraded installation keeps both its persisted records and its existing `DATABASE_URL` until its database is deliberately migrated. `DEV_AUTH_ENABLED=true` is only for local development and test. Production requires `AUTH_MODE=trusted_proxy`, `DEV_AUTH_ENABLED=false`, and a 32+ character `TRUSTED_AUTH_PROXY_SECRET`. Set a long `INTERNAL_EXECUTION_TOKEN` before exposing a controlled target.
 
 ## Production console authentication
 

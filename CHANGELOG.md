@@ -6,7 +6,7 @@ All notable public changes are recorded here. This project follows [Keep a Chang
 
 ### Changed
 
-- Renamed the project, GitHub repository, protocol headers, default Postgres identifiers, package, and public API identity from VerblLayer to Callable. This is a breaking deployment change for trusted-proxy header configuration and local database connection strings. The local Compose volume keeps its legacy physical name so existing records remain mounted.
+- Renamed the project, GitHub repository, protocol headers, default Postgres identifiers, package, and public API identity from VerblLayer to Callable. This is a breaking deployment change for trusted-proxy header configuration. New local installations use the Callable database defaults; upgraded installations keep their existing connection string and physical data volume until deliberately migrated.
 
 ### Added
 
