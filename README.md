@@ -121,7 +121,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md
 
 ## Release status
 
-This repository is preparing for its first public `v0.1.0-beta` release. Before publication, maintainers must apply and verify migrations on a fresh database, run CI on the public remote, configure a private security contact, and complete live Zendesk sandbox proof or retain its pending-verification label.
+This public repository is preparing for its first `v0.1.0-beta` release. Before tagging it, maintainers must apply and verify migrations on a fresh database, confirm remote CI, and complete live Zendesk sandbox proof or retain its pending-verification label.
 
 ## License
 

@@ -2,11 +2,9 @@
 
 ## Reporting a vulnerability
 
-Do not file vulnerabilities in public issues, pull requests, Discussions, or chat.
+Do not file vulnerabilities in public issues, pull requests, Discussions, or chat. Use [GitHub private vulnerability reporting](https://github.com/Romone6/VerblLayer/security/advisories/new) for this repository instead.
 
-Before public publication, the repository owner must replace this paragraph with a monitored private reporting address or GitHub Security Advisories contact. Until that contact exists, VerblLayer is not ready for public release.
-
-A useful report includes the affected commit, attack preconditions, a minimal reproduction, impact, and redacted logs. Do not include API keys, database URLs, proxy secrets, customer records, or other credentials.
+A useful report includes the affected commit, attack preconditions, a minimal reproduction, impact, and redacted logs. Do not include API keys, database URLs, proxy secrets, customer records, or other credentials. Maintainers should acknowledge reports privately and coordinate a fix before public disclosure.
 
 ## Supported deployment posture
 
