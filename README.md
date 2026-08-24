@@ -33,8 +33,10 @@ flowchart LR
 | --- | --- | --- |
 | Controlled Acme Support Admin | Implemented | Real PostgreSQL state and refund execution; fresh Docker-backed release proof is still required in this checkout. |
 | Zendesk ticket update | Implemented | `PUT /api/v2/tickets/{ticket_id}.json`; only server environment-variable names are stored. Live credential proof is pending. |
+| Salesforce connection | Implemented, execution unavailable | Tests the real Salesforce limits endpoint using a server-only bearer-token variable and configured API version. A narrow reviewed execution operation still needs live contract proof. |
 | Workflow discovery | Available when configured | Uses OpenAI, Anthropic, or OpenRouter. Missing credentials return an unavailable state. |
 | REST, MCP, and OpenAPI | Implemented | API-key scoped, persisted agent access. |
+| Agent verification email | Implemented, provider setup required | A connected agent must retrieve the current command list and pass a dry run; Callable then sends the owner/admin the actual command inventory through configured Resend delivery. |
 | Approvals, command versions, audit, and drift | Implemented | Commands are reviewed, versioned, and safety-paused after repeated real failures. |
 | Other SaaS execution targets | Unavailable | Callable does not imply connector support that has not been built and verified. |
 

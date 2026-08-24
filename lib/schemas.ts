@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { isServerEnvironmentVariableName } from "@/lib/connectors/zendesk";
+import { readSalesforceCredentials } from "@/lib/connectors/salesforce";
 
 export const createAppSchema = z.object({
   name: z.string().min(1),
@@ -8,6 +9,7 @@ export const createAppSchema = z.object({
   provider_key: z.enum([
     "internal_acme_support_admin",
     "zendesk",
+    "salesforce",
     "custom_web_app",
     "api_schema",
     "uploaded_workflow_evidence",
@@ -17,11 +19,21 @@ export const createAppSchema = z.object({
   execution_mode: z.literal("api").default("api"),
   metadata_json: z.record(z.string(), z.unknown()).optional(),
 }).superRefine((value, context) => {
-  if (value.provider_key !== "zendesk") return;
+  if (value.provider_key !== "zendesk" && value.provider_key !== "salesforce") return;
 
   const metadata = value.metadata_json ?? {};
   const authEnvironmentKey = metadata.auth_env_key;
   const usernameEnvironmentKey = metadata.username_env_key;
+
+  if (value.provider_key === "salesforce") {
+    if (value.type !== "custom_web_app") context.addIssue({ code: z.ZodIssueCode.custom, path: ["type"], message: "Salesforce must use the custom_web_app app type." });
+    try {
+      readSalesforceCredentials(metadata, { [String(metadata.auth_env_key ?? "")]: "configured" });
+    } catch (error) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["metadata_json"], message: error instanceof Error ? error.message.replace("credential environment variable is unavailable", "auth_env_key must be a server-only environment variable") : "Invalid Salesforce metadata." });
+    }
+    return;
+  }
 
   if (value.type !== "custom_web_app") {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["type"], message: "Zendesk must use the custom_web_app app type." });

@@ -6,6 +6,7 @@ export const appFormSchema = z.object({
   provider_key: z.enum([
     "internal_acme_support_admin",
     "zendesk",
+    "salesforce",
     "custom_web_app",
     "api_schema",
     "uploaded_workflow_evidence",
@@ -16,6 +17,7 @@ export const appFormSchema = z.object({
   metadata_json: z.object({
     auth_env_key: z.string().optional(),
     username_env_key: z.string().optional(),
+    api_version: z.string().optional(),
   }).optional(),
 });
 

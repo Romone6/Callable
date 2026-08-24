@@ -35,6 +35,13 @@ Place an identity-aware reverse proxy in front of the console. It must remove an
 4. Create a command on that app with route `/api/v2/tickets/{ticket_id}.json` and method `PUT`. Its input must include `ticket_id` and one or more of `status`, `priority`, or `comment`.
 5. A live run uses Zendesk's real ticket-update API. Three consecutive non-dry-run failures pause the currently published command and create an audit record; a dry run never counts toward that guard.
 
+## Salesforce connection flow
+
+1. Set a real server environment value such as `SALESFORCE_ACCESS_TOKEN`; do not put the token in the app form.
+2. At `/apps`, choose **Salesforce connection**, enter the Salesforce instance URL, the token variable name, and its REST API version (for example, `v60.0`).
+3. Run **Test connection**. Callable calls Salesforce's real `/services/data/{version}/limits` endpoint and records the actual result.
+4. Salesforce command execution remains unavailable until a specific, reviewed operation is implemented and live-tested. Do not publish arbitrary Salesforce routes as supported execution.
+
 ## Agent API / MCP
 
 Create a scoped API key in `/mcp-api`, then call:
@@ -44,6 +51,8 @@ $headers = @{ Authorization = "Bearer <api_key>"; "Content-Type" = "application/
 Invoke-WebRequest -Method Post -Uri "http://localhost:3100/api/mcp" -Headers $headers -Body '{"tool":"list_commands","args":{}}'
 Invoke-WebRequest -Method Get -Uri "http://localhost:3100/api/v1/openapi"
 ```
+
+For automatic handoff verification, configure the connected agent to call `list_commands`, then make a successful `dry_run_command` call using valid input for one published command. Callable records both events against that API key. When `RESEND_API_KEY` and `CALLABLE_EMAIL_FROM` are set, it sends the earliest provisioned owner/admin a plain-text command inventory and verification record. A generated key alone is not a verified agent connection.
 
 ## Verification
 

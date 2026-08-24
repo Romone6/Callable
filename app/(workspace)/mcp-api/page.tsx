@@ -7,13 +7,16 @@ import { ApiKeyManager } from "@/components/app-shell/api-key-manager";
 import { CopyButton } from "@/components/shared/copy-button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
+import { getAgentVerificationRecords, isVerificationEmailConfigured } from "@/lib/agent-verification-service";
 
 export default async function McpApiPage() {
   const { organisationId } = await getDevContext();
-  const [keys, commands] = await Promise.all([
+  const [keys, commands, verifications] = await Promise.all([
     prisma.apiKey.findMany({ where: { organisationId }, orderBy: { createdAt: "desc" } }),
     prisma.actionCommand.findMany({ where: { organisationId, status: "published" }, orderBy: { createdAt: "desc" } }),
+    getAgentVerificationRecords(organisationId),
   ]);
+  const emailConfigured = isVerificationEmailConfigured();
 
   const sampleCommand = commands[0];
   const endpointSnippet = sampleCommand
@@ -39,6 +42,18 @@ export default async function McpApiPage() {
           </div>
         </Card>
       </div>
+      <Card>
+        <h3 className="text-lg font-semibold">Agent verification</h3>
+        <p className="mt-1 text-sm text-[var(--muted-text)]">An agent is verified after it retrieves the live command list and completes a successful dry run. Callable then emails the workspace owner or admin when delivery is configured.</p>
+        {verifications.length === 0 ? <p className="mt-3 text-sm text-[var(--muted-text)]">Create an API key, connect it to an agent, then let the agent call list_commands and dry_run_command.</p> : (
+          <div className="mt-3 grid gap-2 text-sm">
+            {verifications.map((verification) => <div key={verification.apiKeyId} className="rounded-lg border border-white/10 p-3">
+              <p className="font-medium">{verification.agentName}: {verification.status.state.replaceAll("_", " ")}</p>
+              <p className="mt-1 text-xs text-[var(--muted-text)]">Command list: {verification.listedAt?.toISOString() ?? "not retrieved"} · Dry run: {verification.dryRunAt?.toISOString() ?? "not completed"} · Email: {verification.emailSent ? "sent" : emailConfigured ? "pending" : "delivery unavailable"}</p>
+            </div>)}
+          </div>
+        )}
+      </Card>
       <Card>
         <h3 className="text-lg font-semibold">Published command schemas</h3>
         {commands.length === 0 ? (
