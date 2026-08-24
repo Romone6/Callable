@@ -6,6 +6,7 @@ import { requireApiKey, type ApiKeyScope } from "@/lib/api-key-auth";
 import { corsResponse } from "@/lib/api-security";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { notifyVerifiedAgent } from "@/lib/agent-verification-service";
 
 function authError(message: string) {
   return message.toLowerCase().startsWith("forbidden") ? forbidden(message) : unauthorized(message);
@@ -104,12 +105,14 @@ export async function POST(request: Request) {
           dryRun: true,
           idempotencyKey: request.headers.get("x-idempotency-key") ?? undefined,
         });
+        const outcome = result.status === "succeeded" ? "succeeded" : "failed";
         await writeMcpInvocationAudit({
           organisationId: key.organisationId,
           actorId: key.apiKeyId,
           tool,
-          outcome: "succeeded",
+          outcome,
         });
+        if (outcome === "succeeded") await notifyVerifiedAgent({ organisationId: key.organisationId, apiKeyId: key.apiKeyId, agentName: String(args.agent_name ?? "mcp-agent") });
         return ok({ result });
       }
       case "run_command": {

@@ -3,6 +3,7 @@ import { ConnectionStatus } from "@prisma/client";
 import { getDevContext } from "@/lib/auth";
 import { resolveProviderKeyFromMetadata } from "@/lib/connectors/metadata";
 import { readZendeskCredentials, zendeskAuthorizationHeader } from "@/lib/connectors/zendesk";
+import { buildSalesforceConnectionRequest, readSalesforceCredentials } from "@/lib/connectors/salesforce";
 import { prisma } from "@/lib/db";
 import { forbidden, notFound, ok, serverError } from "@/lib/http";
 import { requirePermission } from "@/lib/permissions";
@@ -10,10 +11,9 @@ import { requirePermission } from "@/lib/permissions";
 async function testConnection(app: { baseUrl: string; type: "internal_web_app" | "custom_web_app" | "api_schema" | "uploaded_workflow_evidence"; metadataJson: unknown }): Promise<string | null> {
   try {
     const providerKey = resolveProviderKeyFromMetadata(app.type, app.metadataJson as never);
-    const endpoint = providerKey === "zendesk" ? new URL("/api/v2/users/me.json", app.baseUrl).toString() : `${app.baseUrl}/api/health`;
-    const headers = providerKey === "zendesk"
-      ? { authorization: zendeskAuthorizationHeader(readZendeskCredentials(app.metadataJson)) }
-      : undefined;
+    const salesforce = providerKey === "salesforce" ? buildSalesforceConnectionRequest(app.baseUrl, readSalesforceCredentials(app.metadataJson)) : null;
+    const endpoint = salesforce?.endpoint ?? (providerKey === "zendesk" ? new URL("/api/v2/users/me.json", app.baseUrl).toString() : `${app.baseUrl}/api/health`);
+    const headers = salesforce?.headers ?? (providerKey === "zendesk" ? { authorization: zendeskAuthorizationHeader(readZendeskCredentials(app.metadataJson)) } : undefined);
     const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(3000) });
 
     if (response.ok) return null;
