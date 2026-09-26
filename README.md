@@ -1,5 +1,7 @@
 # Callable
 
+> **Status: work in progress / pre-release.** Callable is not yet a finished production product and should not be relied on for live business-critical workflows. Implemented components and unverified boundaries are documented separately below.
+
 **Turn real business workflows into reviewed, agent-callable commands.**
 
 Callable is an open-source, self-hosted command layer for existing business software. It accepts real workflow evidence, helps an operator turn that evidence into a reviewed command contract, and exposes the command to AI agents through REST and MCP. Every execution, approval, drift check, and audit event is persisted.
@@ -116,6 +118,7 @@ Use the returned input schema and command name for any subsequent call. Callable
 - Zendesk supports ticket updates only; OAuth and browser execution are out of scope.
 - Drift checks are route-level, not semantic contract validation.
 - The in-process limiter is suitable for a single instance; use an edge gateway for multi-instance rate limiting.
+- Live external-provider verification is incomplete in several paths; local or mocked proof must not be interpreted as production readiness.
 
 ## Contributing and security
 
